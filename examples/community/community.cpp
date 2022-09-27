@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <chrono>
 
 int main(int argc, char* argv[]) {
   Env = TEnv(argc, argv, TNotify::StdNotify);
@@ -14,6 +15,8 @@ int main(int argc, char* argv[]) {
   //PUNGraph Graph = TSnap::GenRndGnm<PUNGraph>(5000, 10000); // generate a random graph
 
   TSnap::DelSelfEdges(Graph);
+
+  auto start = std::chrono::high_resolution_clock::now();
   TCnComV CmtyV;
   double Q = 0.0;
   TStr CmtyAlgStr;
@@ -27,26 +30,37 @@ int main(int argc, char* argv[]) {
     CmtyAlgStr = "Infomap";
     Q = TSnap::Infomap(Graph, CmtyV); }
   else { Fail; }
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+
+  printf("# Input: %s\n", InFNm.CStr());
+  printf("# Nodes: %d    Edges: %d\n", Graph->GetNodes(), Graph->GetEdges());
+  printf("# Algorithm: %s\n", CmtyAlgStr.CStr());
+  if (CmtyAlg!=3) {
+    printf("# Modularity: %f\n", Q);
+  } else {
+    printf("# Average code length: %f\n", Q);
+  }
+  printf("# Communities: %d\n", CmtyV.Len());
+
+  //fprintf(F, "# NId\tCommunityId\n");
+  //for (int c = 0; c < CmtyV.Len(); c++) {
+  //  for (int i = 0; i < CmtyV[c].Len(); i++) {
+  //    fprintf(F, "%d\t%d\n", CmtyV[c][i].Val, c);
+  //  }
+  //}
 
   FILE *F = fopen(OutFNm.CStr(), "wt");
-  fprintf(F, "# Input: %s\n", InFNm.CStr());
-  fprintf(F, "# Nodes: %d    Edges: %d\n", Graph->GetNodes(), Graph->GetEdges());
-  fprintf(F, "# Algoritm: %s\n", CmtyAlgStr.CStr());
-  if (CmtyAlg!=3) {
-    fprintf(F, "# Modularity: %f\n", Q);
-  } else {
-    fprintf(F, "# Average code length: %f\n", Q);
-  }
-  fprintf(F, "# Communities: %d\n", CmtyV.Len());
-  fprintf(F, "# NId\tCommunityId\n");
   for (int c = 0; c < CmtyV.Len(); c++) {
     for (int i = 0; i < CmtyV[c].Len(); i++) {
-      fprintf(F, "%d\t%d\n", CmtyV[c][i].Val, c);
+      fprintf(F, "%d\t", CmtyV[c][i].Val);
     }
+    fprintf(F, "\n");
   }
   fclose(F);
 
   Catch
   printf("\nrun time: %s (%s)\n", ExeTm.GetTmStr(), TSecTm::GetCurTm().GetTmStr().CStr());
+  printf("\nCluster Time: %f\n", duration.count());
   return 0;
 }
