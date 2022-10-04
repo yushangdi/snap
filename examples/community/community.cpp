@@ -59,8 +59,10 @@ int main(int argc, char* argv[]) {
   }
   fclose(F);
 
+  printf("\nCluster Time: %f\n", duration.count());
+
   Catch
   printf("\nrun time: %s (%s)\n", ExeTm.GetTmStr(), TSecTm::GetCurTm().GetTmStr().CStr());
-  printf("\nCluster Time: %f\n", duration.count());
+  
   return 0;
 }
