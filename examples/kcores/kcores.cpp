@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <iostream>
 
 int main(int argc, char* argv[]) {
   Env = TEnv(argc, argv, TNotify::StdNotify);
@@ -9,6 +10,7 @@ int main(int argc, char* argv[]) {
   const TStr InFNm = Env.GetIfArgPrefixStr("-i:", "../as20graph.txt", "Input undirected graph file (single directed edge per line)");
   const bool Save = Env.GetIfArgPrefixBool("-s:", true, "Save the k-core network (for every k)");
   TStr OutFNm = Env.GetIfArgPrefixStr("-o:", "", "Output file prefix");
+  const bool PlotFNm = Env.GetIfArgPrefixBool("-p:", false, "Plot k-core decomposition of graph");
   if (OutFNm.Empty()) { OutFNm = InFNm.GetFMid(); }
 
   PUNGraph G;
@@ -19,7 +21,10 @@ int main(int argc, char* argv[]) {
     TFIn FIn(InFNm);  G=TSnap::ConvertGraph<PUNGraph>(TNGraph::Load(FIn), false); }
   else {
     G = TSnap::LoadEdgeList<PUNGraph>(InFNm, 0, 1); }
+  printf("\nGraph Loading Time: %f\n", ExeTm.GetSecs());
 
+
+  TExeTm ExeTm2;
   TKCore<PUNGraph> KCore(G);
   TIntPrV KCoreV;
   while (KCore.GetNextCore()!=0) {
@@ -29,9 +34,11 @@ int main(int argc, char* argv[]) {
         TStr::Fmt("%d-core of graph %s", KCore.GetCurK(), InFNm.CStr()));
     }
   }
+  printf("\nKCore Time: %f\n", ExeTm2.GetSecs());
+  if(PlotFNm){
   TGnuPlot::PlotValV(KCoreV, "kcore-"+OutFNm, TStr::Fmt("k-core decomposition of graph %s (%d, %d)",
     OutFNm.CStr(), G->GetNodes(), G->GetEdges()), "k (min node degree in the k-core)", "Number of nodes in the k-core", gpsLog);
-
+  }
   Catch
   printf("\nrun time: %s (%s)\n", ExeTm.GetTmStr(), TSecTm::GetCurTm().GetTmStr().CStr());
   return 0;

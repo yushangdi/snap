@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
   Try
   const TStr InFNm = Env.GetIfArgPrefixStr("-i:", "as20graph.txt", "Input file");
   const TStr OutFNm = Env.GetIfArgPrefixStr("-o:", "graph", "Output file prefix");
-  const TStr WCCOnl = Env.GetIfArgPrefixStr("-wcconly:", "false", "Only run weakly connected component");
+  const bool WCCOnl = Env.GetIfArgPrefixBool("-wcconly:", false, "Save the k-core network (for every k)");
   if (Env.IsEndOfRun()) { return 0; }
   TExeTm ExeTm;
   PNGraph Graph;
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
   TCnCom::SaveTxt(CnComV, TStr::Fmt("%s.wcc.txt", OutFNm.CStr()), "Weakly connected components");
   CnComV.Clr();
   printf("\nWriting Time: %f\n", ExeTm2.GetSecs());
-  if(WCCOnl == "true"){
+  if(WCCOnl){
     printf("\nrun time: %s (%s)\n", ExeTm.GetTmStr(), TSecTm::GetCurTm().GetTmStr().CStr());
     return 0;
   }
