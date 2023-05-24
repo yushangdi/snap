@@ -7,18 +7,30 @@ int main(int argc, char* argv[]) {
   Try
   const TStr InFNm = Env.GetIfArgPrefixStr("-i:", "as20graph.txt", "Input file");
   const TStr OutFNm = Env.GetIfArgPrefixStr("-o:", "graph", "Output file prefix");
+  const TStr WCCOnl = Env.GetIfArgPrefixStr("-wcconly:", "false", "Only run weakly connected component");
   if (Env.IsEndOfRun()) { return 0; }
   TExeTm ExeTm;
   PNGraph Graph;
   printf("Loading...\n");
   Graph = TSnap::LoadEdgeList<PNGraph>(InFNm);
   printf("Graph: %d nodes, %d edges\n", Graph->GetNodes(), Graph->GetEdges());
+  printf("\nGraph Loading Time: %f\n", ExeTm.GetSecs());
+
   TCnComV CnComV;
   // weakly connected components
   printf("Wccs...\n");
+  TExeTm ExeTm2;
   TSnap::GetWccs(Graph, CnComV);
+  printf("\nWealy Connected Component Time: %f\n", ExeTm2.GetSecs());
+  ExeTm2.Tick();
+
   TCnCom::SaveTxt(CnComV, TStr::Fmt("%s.wcc.txt", OutFNm.CStr()), "Weakly connected components");
   CnComV.Clr();
+  printf("\nWriting Time: %f\n", ExeTm2.GetSecs());
+  if(WCCOnl == "true"){
+    printf("\nrun time: %s (%s)\n", ExeTm.GetTmStr(), TSecTm::GetCurTm().GetTmStr().CStr());
+    return 0;
+  }
   // strongly connected components
   printf("Sccs...\n");
   TSnap::GetSccs(Graph, CnComV);
