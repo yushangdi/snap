@@ -1,5 +1,6 @@
 #include "stdafx.h"
-#include <chrono>
+// #include <chrono>
+#include <ctime>
 
 int main(int argc, char* argv[]) {
   Env = TEnv(argc, argv, TNotify::StdNotify);
@@ -11,12 +12,13 @@ int main(int argc, char* argv[]) {
   const int CmtyAlg = Env.GetIfArgPrefixInt("-a:", 2, "Algorithm: 1:Girvan-Newman, 2:Clauset-Newman-Moore, 3:Infomap");
 
   PUNGraph Graph = TSnap::LoadEdgeList<PUNGraph>(InFNm, false);
+  printf("Graph Loaded\n");
   //PUNGraph Graph = TSnap::LoadEdgeList<PUNGraph>("../as20graph.txt", false);
   //PUNGraph Graph = TSnap::GenRndGnm<PUNGraph>(5000, 10000); // generate a random graph
 
   TSnap::DelSelfEdges(Graph);
 
-  auto start = std::chrono::high_resolution_clock::now();
+  clock_t start = clock();
   TCnComV CmtyV;
   double Q = 0.0;
   TStr CmtyAlgStr;
@@ -30,8 +32,10 @@ int main(int argc, char* argv[]) {
     CmtyAlgStr = "Infomap";
     Q = TSnap::Infomap(Graph, CmtyV); }
   else { Fail; }
-  auto stop = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+  clock_t end = clock();
+  double duration = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+
+  printf("\nCluster Time: %f\n", duration);
 
   printf("# Input: %s\n", InFNm.CStr());
   printf("# Nodes: %d    Edges: %d\n", Graph->GetNodes(), Graph->GetEdges());
@@ -58,8 +62,6 @@ int main(int argc, char* argv[]) {
     fprintf(F, "\n");
   }
   fclose(F);
-
-  printf("\nCluster Time: %f\n", duration.count());
 
   Catch
   printf("\nrun time: %s (%s)\n", ExeTm.GetTmStr(), TSecTm::GetCurTm().GetTmStr().CStr());

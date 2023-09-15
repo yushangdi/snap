@@ -321,16 +321,19 @@ double CommunityGirvanNewman(PUNGraph& Graph, TCnComV& CmtyV) {
   TCnComV CurCmtyV;
   CmtyV.Clr();
   TIntV Cmty1, Cmty2;
+  int round = 0;
   while (true) {
+    round++;
     TSnapDetail::CmtyGirvanNewmanStep(LocalGraph, Cmty1, Cmty2);
     const double Q = TSnapDetail::_GirvanNewmanGetModularity(LocalGraph, OutDegH, NEdges, CurCmtyV);
-    //printf("current modularity: %f\n", Q);
+    printf("current modularity: %f\n", Q);
     if (Q > BestQ) {
       BestQ = Q; 
       CmtyV.Swap(CurCmtyV);
     }
     if (Cmty1.Len() == 0 || Cmty2.Len() == 0) { break; }
   }
+  printf("Round: %d\n", round);
   return BestQ;
 }
 
